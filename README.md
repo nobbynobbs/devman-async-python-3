@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nobbynobbs/devman-async-python-3.svg?branch=master)](https://travis-ci.org/nobbynobbs/devman-async-python-3)
+
 # Streamer
 
 Module 3 of Devman's async Python [course](https://dvmn.org/modules/async-python)
