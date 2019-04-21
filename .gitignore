@@ -1,6 +1,9 @@
 .idea/
 .vscode/
+
 .pytest_cache/
+.coverage
+
 .tox/
 *.py[co]
 __pycache__/
