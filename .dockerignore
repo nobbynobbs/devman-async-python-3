@@ -1,0 +1,7 @@
+.idea/
+.tox/
+.vscode/
+.git/
+.gitignore
+tests/
+README.md
