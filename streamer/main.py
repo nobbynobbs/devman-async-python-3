@@ -24,19 +24,12 @@ async def archivate(request):
     dirname = request.match_info["hash"]  # type: str
     if not VALID_FOLDER_NAME.match(dirname):
         raise web.HTTPBadRequest(text="only letters and digits allowed in param")
-        # return web.json_response(
-        #     {"message": "bad request, only letters and digits allowed in param"},
-        #     status=400
-        # )
+    
     base_path = request.app["storage"]
     full_path = os.path.join(base_path, dirname)
     if os.path.isdir(full_path):    
         return web.Response(text="Hello, {}".format(dirname))
     raise web.HTTPNotFound(text="folder was deleted or never existed")
-    # return web.json_response(
-    #         {"message": "folder was deleted or never existed"},
-    #         status=404
-    # )
 
 async def handle_index_page(request):
     async with aiofiles.open('templates/index.html', mode='r') as index_file:
