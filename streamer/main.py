@@ -7,32 +7,41 @@ import re
 import aiofiles
 from aiohttp import web
 
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 VALID_FOLDER_NAME = re.compile(r"^[\w\d]{4,}$")
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(description="aiohttp based streaming service")
+    parser = argparse.ArgumentParser(
+        description="aiohttp based streaming service"
+    )
     parser.add_argument(
-        "-s", "--storage", required=True, type=str, help="path to file containing directory"
+        "-s", "--storage", required=True, type=str,
+        help="path to file containing directory"
     )
     args = parser.parse_args()
     return args
 
 
 async def archivate(request):
-    
+
     dirname = request.match_info["hash"]  # type: str
     if not VALID_FOLDER_NAME.match(dirname):
-        raise web.HTTPBadRequest(text="only letters and digits allowed in param")
-    
+        raise web.HTTPBadRequest(
+            text="only letters and digits allowed in param"
+        )
+
     base_path = request.app["storage"]
     full_path = os.path.join(base_path, dirname)
-    if os.path.isdir(full_path):    
+    if os.path.isdir(full_path):
         return web.Response(text="Hello, {}".format(dirname))
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
+
 async def handle_index_page(request):
-    async with aiofiles.open('templates/index.html', mode='r') as index_file:
+    async with aiofiles.open(
+        os.path.join(BASE_DIR, 'templates/index.html'), mode='r'
+    ) as index_file:
         index_contents = await index_file.read()
     return web.Response(text=index_contents, content_type='text/html')
 
