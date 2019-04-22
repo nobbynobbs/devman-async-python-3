@@ -7,7 +7,7 @@ class Zipper:
         self.command = " ".join(["zip", "-", self.filename])
         self.proc = self.stdout = self.stderr = None
 
-    async def init(self):
+    async def __aenter__(self):
         self.proc = await subprocess.create_subprocess_shell(
             self.command,
             subprocess.PIPE,
@@ -21,5 +21,5 @@ class Zipper:
             chunk_size = -1  # read until EOF
         return await self.stdout.read(chunk_size)
 
-    async def wait(self):
+    async def __aexit__(self, exc_type, exc, traceback):
         await self.proc.wait()
