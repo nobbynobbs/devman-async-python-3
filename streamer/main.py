@@ -7,6 +7,8 @@ import re
 import aiofiles
 from aiohttp import web
 
+from streamer.zipper import Zipper
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 VALID_FOLDER_NAME = re.compile(r"^[\w\d]{4,}$")
 
@@ -34,7 +36,23 @@ async def archivate(request):
     base_path = request.app["storage"]
     full_path = os.path.join(base_path, dirname)
     if os.path.isdir(full_path):
-        return web.Response(text="Hello, {}".format(dirname))
+        response = web.StreamResponse(
+            headers={
+                "Content-Disposition": 'attachment; filename="{}.zip"'.format(
+                    dirname
+                )
+            }
+        )
+        response.content_type = "application/zip"
+        await response.prepare(request)
+        zipper = Zipper(full_path)
+        async with zipper:
+            while True:
+                chunk = await zipper.read()
+                if chunk == b"":
+                    # await response.write_eof()  # not necessary
+                    return response
+                await response.write(chunk)
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
 

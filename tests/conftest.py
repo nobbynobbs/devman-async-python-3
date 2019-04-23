@@ -13,6 +13,11 @@ def file_path():
 
 
 @pytest.fixture
+def directory_path(file_path):
+    return os.path.dirname(file_path)
+
+
+@pytest.fixture
 def file_content(file_path):
     with open(file_path, "rb") as f_h:
         return f_h.read()

@@ -7,8 +7,8 @@ from streamer.zipper import Zipper
 
 
 @pytest.yield_fixture
-async def zipper(file_path):
-    return Zipper(file_path)
+async def zipper(directory_path):
+    return Zipper(directory_path)
 
 
 @pytest.mark.asyncio
@@ -17,12 +17,12 @@ async def test_gready_zipper(zipper, file_path, file_content):
     async with zipper:
         res = await zipper.read(0)
     z = zipfile.ZipFile(io.BytesIO(res))
-    unzipped = z.read(file_path[1:])
+    unzipped = z.read('random-bytes')
     assert unzipped == file_content
 
 
 @pytest.mark.asyncio
-async def test_chunked_zipper(zipper, file_path, file_content):
+async def test_chunked_zipper(zipper, directory_path, file_content):
     """read output by chunks"""
     res = b""
     async with zipper:
@@ -32,5 +32,5 @@ async def test_chunked_zipper(zipper, file_path, file_content):
                 break
             res += chunk
     z = zipfile.ZipFile(io.BytesIO(res))
-    unzipped = z.read(file_path[1:])
+    unzipped = z.read('random-bytes')
     assert unzipped == file_content
