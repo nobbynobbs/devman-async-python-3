@@ -32,6 +32,6 @@ class Zipper:
         """kill subprocess if error happened,
         or gracefully wait while process finished"""
         if exc:
-            await self.proc.kill()
+            self.proc.kill()
         else:
             await self.proc.wait()

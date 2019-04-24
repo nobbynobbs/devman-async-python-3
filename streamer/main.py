@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import asyncio
 import argparse
 import logging
 import os
-import re
 
 import aiofiles
 from aiohttp import web
@@ -41,15 +41,18 @@ async def archivate(request):
         response.content_type = "application/zip"
         await response.prepare(request)
         zipper = Zipper(full_path)
-        async with zipper:
-            while True:
-                chunk = await zipper.read()
-                if chunk == b"":
-                    # not necessary, called implicitly
-                    # await response.write_eof()
-                    return response
-                logging.debug("Sending archive chunk...")
-                await response.write(chunk)
+        try:
+            async with zipper:
+                while True:
+                    chunk = await zipper.read()
+                    if chunk == b"":
+                        # not necessary, called implicitly
+                        # await response.write_eof()
+                        return response
+                    logging.debug("Sending archive chunk...")
+                    await response.write(chunk)
+        except asyncio.CancelledError:
+            response.force_close()
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
 
