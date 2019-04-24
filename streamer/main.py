@@ -11,7 +11,6 @@ from aiohttp import web
 from streamer.zipper import Zipper
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-VALID_FOLDER_NAME = re.compile(r"^[\w\d]{4,}$")
 
 
 def parse_args():
@@ -29,11 +28,6 @@ def parse_args():
 async def archivate(request):
 
     dirname = request.match_info["hash"]  # type: str
-    if not VALID_FOLDER_NAME.match(dirname):
-        raise web.HTTPBadRequest(
-            text="only letters and digits allowed in param"
-        )
-
     base_path = request.app["storage"]
     full_path = os.path.join(base_path, dirname)
     if os.path.isdir(full_path):
@@ -73,7 +67,7 @@ def get_app(storage):
     app["storage"] = storage
     app.add_routes([
         web.get("/", handle_index_page),
-        web.get("/archive/{hash}/", archivate),
+        web.get(r"/archive/{hash:[\d\w]{4,}}/", archivate),
 
     ])
     return app

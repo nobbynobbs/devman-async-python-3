@@ -26,12 +26,12 @@ async def test_index(aiohttp_client, app):
     assert "Микросервис для скачивания файлов" in text
 
 
-async def test_archivate_bad_request(aiohttp_client, app):
+async def test_archivate_path_param_dont_match_regex(aiohttp_client, app):
     client = await aiohttp_client(app)
     resp = await client.get("/archive/7kna../")
-    assert resp.status == 400
+    assert resp.status == 404
     resp = await client.get("/archive/7k-na/")
-    assert resp.status == 400
+    assert resp.status == 404
 
 
 async def test_archivate_not_found(aiohttp_client, app):
