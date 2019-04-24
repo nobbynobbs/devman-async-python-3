@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
 import os
 import re
 
@@ -50,8 +51,10 @@ async def archivate(request):
             while True:
                 chunk = await zipper.read()
                 if chunk == b"":
-                    # await response.write_eof()  # not necessary
+                    # not necessary, called implicitly
+                    # await response.write_eof()
                     return response
+                logging.debug("Sending archive chunk...")
                 await response.write(chunk)
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
@@ -78,6 +81,7 @@ def get_app(storage):
 
 def main():
     args = parse_args()
+    logging.basicConfig(level=logging.DEBUG)
     app = get_app(args.storage)
     web.run_app(app)
 

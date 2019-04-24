@@ -1,4 +1,7 @@
+import io
 import os
+import zipfile
+
 import pytest
 
 from conftest import TESTS_DIR
@@ -41,4 +44,14 @@ async def test_archivate_ok(aiohttp_client, app):
     client = await aiohttp_client(app)
     resp = await client.get("/archive/7kna/")
     assert resp.status == 200
-    await resp.read()
+    archive = await resp.read()
+    assert zipfile.is_zipfile(io.BytesIO(archive))
+
+
+async def test_client_close_connection(aiohttp_client, app):
+    """just open connection and don't read response
+    there should not be warnings in console
+    """
+    client = await aiohttp_client(app)
+    resp = await client.get("/archive/7kna/")
+    assert resp.status == 200
