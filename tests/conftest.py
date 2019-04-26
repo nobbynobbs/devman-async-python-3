@@ -9,7 +9,7 @@ TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @pytest.fixture
 def file_path():
-    return os.path.join(TESTS_DIR, "test-files", "random-bytes")
+    return os.path.join(TESTS_DIR, "test-files", "unit", "random-bytes")
 
 
 @pytest.fixture
