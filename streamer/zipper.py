@@ -31,12 +31,11 @@ class Zipper:
         return chunk
 
     async def __aexit__(self, exc_type, exc, traceback):
-        """kill subprocess if error happened, empty read buffers and
-        wait while process actually finished"""
+        """kill subprocess if error happened and empty stdout buffer"""
         if exc:
             logging.debug("send sigkill to zipper subprocess")
             self.proc.kill()
-            await self.proc.communicate()  # flush read buffers
-        logging.debug("wait while zipper subprocess finished")
-        await self.proc.wait()
+            # call communicate to flush read buffers, otherwise
+            # RuntimeError rised in BaseSubprocessTransport.__del__
+            await self.proc.communicate()  
         logging.debug("exit zipper contextmanage")

@@ -7,9 +7,9 @@ Module 3 of Devman's async Python [course](https://dvmn.org/modules/async-python
 ## Run service
 
 ### With docker-compose
-run service on port 8000
+run service on port 8080
 ```bash
-docker-compose up [-d]  # -d - run in detached mode
+docker-compose up --build [-d]  # -d - run in detached mode
 ```
 
 ### With docker
@@ -17,9 +17,19 @@ docker-compose up [-d]  # -d - run in detached mode
 # first build image
 docker build -t streamer .
 # run container
-docker run --rm -it -p 8000:8080 streamer  # interactive with tty
-docker run --rm -d -p 8000:8080 streamer  # detached 
+docker run --rm -it -p 8080:8080 streamer  # interactive with tty
+docker run --rm -d -p 8080:8080 streamer  # detached 
 ```
+
+### Without docker
+from repository root directory run:
+```bash
+PYTHONPATH=. python streamer/main.py --log=DEBUG
+```
+
+To see available args pass `--help` argument.
+Configuring with environment variables also supported, for example see `.env.example`
+and `docker-compose.yml`
 
 ## Where is requirements.txt?
 

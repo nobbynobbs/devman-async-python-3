@@ -1,6 +1,7 @@
 import io
 import os
 import zipfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -13,9 +14,15 @@ def storage():
     return os.path.join(TESTS_DIR, "test-files", "test-photos")
 
 
+@pytest.fixture(scope="session")
+def args(storage):
+    """args object mock"""
+    return SimpleNamespace(archive=storage, delay=0)
+
+
 @pytest.fixture(scope="function")
-def app(storage):
-    return get_app(storage)
+def app(args):
+    return get_app(args)
 
 
 async def test_index(aiohttp_client, app):

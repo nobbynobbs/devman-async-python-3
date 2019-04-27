@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import asyncio
-import argparse
 import logging
 import os
 
@@ -10,49 +9,56 @@ from aiohttp import web
 
 from streamer.zipper import Zipper
 import streamer.settings as settings
+from streamer.settings import get_args
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="aiohttp based streaming service"
+async def read_and_write_chunks(response, reader, delay):
+    await asyncio.sleep(delay)
+    chunk = await reader.read()
+    if chunk == b"":
+        # not necessary, called implicitly
+        # await response.write_eof()
+        logging.debug("Request succesfully processed...")
+        return response
+    logging.debug("Sending archive chunk...")
+    await response.write(chunk)
+    logging.debug("Chunk sent...")
+
+
+async def stream_archivate_response(request, full_path, dirname, delay=0):
+    response = get_archivate_response(dirname)
+    await response.prepare(request)  # send headers
+    zipper = Zipper(full_path)
+    async with zipper:
+        result = None
+        while result is None:
+            result = await read_and_write_chunks(response, zipper, delay)
+    return result
+
+
+def get_archivate_response(dirname):
+    response = web.StreamResponse(
+        headers={
+            "Content-Disposition": 'attachment; filename="{}.zip"'.format(
+                dirname
+            )
+        }
     )
-    parser.add_argument(
-        "-s", "--storage", required=True, type=str,
-        help="path to file containing directory"
-    )
-    args = parser.parse_args()
-    return args
+    response.content_type = "application/zip"
+    response.force_close()  # just set keep-alive to False
+    return response
 
 
 async def archivate(request):
-    dirname = request.match_info["hash"]  # type: str
     logging.debug("Accepting request...")
-    base_path = request.app["storage"]
+    dirname = request.match_info["hash"]  # type: str
+    base_path = request.app["settings"].storage
     full_path = os.path.join(base_path, dirname)
     if os.path.isdir(full_path):
-        response = web.StreamResponse(
-            headers={
-                "Content-Disposition": 'attachment; filename="{}.zip"'.format(
-                    dirname
-                )
-            }
+        result = await stream_archivate_response(
+            request, full_path, dirname, request.app["settings"].delay
         )
-        response.content_type = "application/zip"
-        response.force_close()  # just set keep-alive to False
-        await response.prepare(request)  # send headers
-        zipper = Zipper(full_path)
-        async with zipper:
-            while True:
-                await asyncio.sleep(0.01)
-                chunk = await zipper.read()
-                if chunk == b"":
-                    # not necessary, called implicitly
-                    # await response.write_eof()
-                    logging.debug("Request succesfully processed...")
-                    return response
-                logging.debug("Sending archive chunk...")
-                await response.write(chunk)
-                logging.debug("Chunk sent...")
+        return result
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
 
@@ -64,10 +70,10 @@ async def handle_index_page(request):
     return web.Response(text=index_contents, content_type='text/html')
 
 
-def get_app(storage):
+def get_app(args):
     """prepare and return aiohttp app instance"""
     app = web.Application(middlewares=[web.normalize_path_middleware()])
-    app["storage"] = storage
+    app["settings"] = args
     app.add_routes([
         web.get("/", handle_index_page),
         web.get(r"/archive/{hash:[\d\w]{4,}}/", archivate),
@@ -76,9 +82,9 @@ def get_app(storage):
 
 
 def main():
-    args = parse_args()
-    logging.basicConfig(level=logging.DEBUG)
-    app = get_app(args.storage)
+    args = get_args()
+    logging.basicConfig(level=getattr(logging, args.log))
+    app = get_app(args)
     web.run_app(app)
 
 
