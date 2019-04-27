@@ -11,13 +11,13 @@ from streamer.main import get_app
 
 @pytest.fixture(scope="session")
 def storage():
-    return os.path.join(TESTS_DIR, "test-files", "test-photos")
+    return os.path.join(TESTS_DIR, "..", "photos")
 
 
 @pytest.fixture(scope="session")
 def args(storage):
     """args object mock"""
-    return SimpleNamespace(archive=storage, delay=0)
+    return SimpleNamespace(storage=storage, delay=0)
 
 
 @pytest.fixture(scope="function")

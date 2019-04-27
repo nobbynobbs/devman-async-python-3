@@ -37,5 +37,5 @@ class Zipper:
             self.proc.kill()
             # call communicate to flush read buffers, otherwise
             # RuntimeError rised in BaseSubprocessTransport.__del__
-            await self.proc.communicate()  
+            await self.proc.communicate()
         logging.debug("exit zipper contextmanage")
