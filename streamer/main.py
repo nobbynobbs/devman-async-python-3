@@ -13,27 +13,17 @@ from streamer.settings import get_args
 
 
 async def read_and_write_chunks(response, reader, delay):
-    await asyncio.sleep(delay)
-    chunk = await reader.read()
-    if chunk == b"":
-        # not necessary, called implicitly
-        # await response.write_eof()
-        logging.debug("Request succesfully processed...")
-        return response
-    logging.debug("Sending archive chunk...")
-    await response.write(chunk)
-    logging.debug("Chunk sent...")
-
-
-async def stream_archivate_response(request, full_path, dirname, delay=0):
-    response = get_archivate_response(dirname)
-    await response.prepare(request)  # send headers
-    zipper = Zipper(full_path)
-    async with zipper:
-        result = None
-        while result is None:
-            result = await read_and_write_chunks(response, zipper, delay)
-    return result
+    while True:
+        await asyncio.sleep(delay)
+        chunk = await reader.read()
+        if chunk == b"":
+            # not necessary, called implicitly
+            # await response.write_eof()
+            logging.debug("Request succesfully processed...")
+            return response
+        logging.debug("Sending archive chunk...")
+        await response.write(chunk)
+        logging.debug("Chunk sent...")
 
 
 def get_archivate_response(dirname):
@@ -55,9 +45,13 @@ async def archivate(request):
     base_path = request.app["settings"].storage
     full_path = os.path.join(base_path, dirname)
     if os.path.isdir(full_path):
-        result = await stream_archivate_response(
-            request, full_path, dirname, request.app["settings"].delay
-        )
+        response = get_archivate_response(dirname)
+        await response.prepare(request)  # send headers
+        zipper = Zipper(full_path)
+        async with zipper:
+            result = await read_and_write_chunks(
+                response, zipper, request.app["settings"].delay
+            )
         return result
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
