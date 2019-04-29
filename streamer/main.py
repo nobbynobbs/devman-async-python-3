@@ -20,7 +20,7 @@ async def read_and_write_chunks(response, reader, delay):
             # not necessary, called implicitly
             # await response.write_eof()
             logging.debug("Request succesfully processed...")
-            return response
+            break
         logging.debug("Sending archive chunk...")
         await response.write(chunk)
         logging.debug("Chunk sent...")
@@ -48,10 +48,10 @@ async def archivate(request):
         response = get_archivate_response(dirname)
         await response.prepare(request)  # send headers
         async with Zipper(full_path) as zipper:
-            result = await read_and_write_chunks(
+            await read_and_write_chunks(
                 response, zipper, request.app["settings"].delay
             )
-        return result
+        return response
     raise web.HTTPNotFound(text="folder was deleted or never existed")
 
 
