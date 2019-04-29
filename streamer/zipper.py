@@ -19,6 +19,7 @@ class Zipper:
         )
         self.stdout = self.proc.stdout
         self.stderr = self.proc.stderr
+        return self
 
     async def read(self, chunk_size=1024):
         """read part of data from pipe. read all the data if

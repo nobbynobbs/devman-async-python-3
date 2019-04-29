@@ -47,8 +47,7 @@ async def archivate(request):
     if os.path.isdir(full_path):
         response = get_archivate_response(dirname)
         await response.prepare(request)  # send headers
-        zipper = Zipper(full_path)
-        async with zipper:
+        async with Zipper(full_path) as zipper:
             result = await read_and_write_chunks(
                 response, zipper, request.app["settings"].delay
             )
