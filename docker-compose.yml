@@ -5,8 +5,11 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./photos:/opt/streamer/test-photos:ro
+      # `ro` cuz we dont't need __pycache__ owned by root
+      # and other side effects on our host
+      - ./streamer:/opt/streamer:ro 
+      - ./photos:/var/streamer/test-photos:ro
     environment:
       LOG_LEVEL: DEBUG
-      STORAGE: test-photos
+      STORAGE: /var/streamer/test-photos
       DELAY: 0.01
