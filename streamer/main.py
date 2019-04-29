@@ -45,15 +45,27 @@ async def archivate(request):
     dirname = request.match_info["hash"]  # type: str
     base_path = request.app["settings"].storage
     full_path = os.path.join(base_path, dirname)
-    if os.path.isdir(full_path):
-        response = get_archivate_response(dirname)
-        await response.prepare(request)  # send headers
-        async with Zipper(full_path) as zipper:
-            await read_and_write_chunks(
-                response, zipper, request.app["settings"].delay
-            )
-        return response
-    raise web.HTTPNotFound(text="folder was deleted or never existed")
+    if not os.path.isdir(full_path):
+        raise web.HTTPNotFound(text="folder was deleted or never existed")
+
+    # ифчик инвертировал, но вообще пишу нормальный вариант
+    # после ифа вполне осмысленно потому что есть вот такое мнение,
+    # которое лично мне близко:
+    #
+    # Put the normal case after the if rather than after the else
+    #
+    # Put the case you normally expect to process first.
+    # This is in line with the general principle of putting code
+    # that results from a decision as close as possible to the decision.
+    # (c) Code Complete, Steve McConnell
+
+    response = get_archivate_response(dirname)
+    await response.prepare(request)  # send headers
+    async with Zipper(full_path) as zipper:
+        await read_and_write_chunks(
+            response, zipper, request.app["settings"].delay
+        )
+    return response
 
 
 async def handle_index_page(request):

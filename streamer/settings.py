@@ -7,7 +7,7 @@ DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_DELAY = 0.01
 DEFAULT_STORAGE = "./photos"
 
-ALLOWED_LOG_LEVELS=(
+ALLOWED_LOG_LEVELS = (
     "CRITICAL",
     "FATAL",
     "ERROR",
@@ -17,6 +17,7 @@ ALLOWED_LOG_LEVELS=(
     "DEBUG",
     "NOTSET",
 )
+
 
 def get_args():
 
