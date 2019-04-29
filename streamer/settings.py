@@ -1,8 +1,6 @@
 import argparse
 import os
 
-import dotenv
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DEFAULT_LOG_LEVEL = "INFO"
@@ -11,7 +9,6 @@ DEFAULT_STORAGE = "./photos"
 
 
 def get_args():
-    dotenv.load_dotenv()
 
     parser = argparse.ArgumentParser(
         description="Aiohttp based streaming service",

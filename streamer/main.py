@@ -6,6 +6,7 @@ import os
 
 import aiofiles
 from aiohttp import web
+import dotenv
 
 from streamer.zipper import Zipper
 import streamer.settings as settings
@@ -75,6 +76,7 @@ def get_app(args):
 
 
 def main():
+    dotenv.load_dotenv()
     args = get_args()
     logging.basicConfig(level=getattr(logging, args.log))
     app = get_app(args)
