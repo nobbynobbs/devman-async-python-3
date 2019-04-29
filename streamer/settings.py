@@ -7,6 +7,16 @@ DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_DELAY = 0.01
 DEFAULT_STORAGE = "./photos"
 
+ALLOWED_LOG_LEVELS=(
+    "CRITICAL",
+    "FATAL",
+    "ERROR",
+    "WARNING",
+    "WARN",
+    "INFO",
+    "DEBUG",
+    "NOTSET",
+)
 
 def get_args():
 
@@ -24,7 +34,7 @@ def get_args():
 
     parser.add_argument(
         "-d", "--delay",
-        help="Interval between sending the chunks  in seconds",
+        help="Interval between sending the chunks in seconds",
         required=False,
         type=float,
         default=os.getenv("DELAY", DEFAULT_DELAY),
@@ -35,6 +45,7 @@ def get_args():
         help="Loging level",
         required=False,
         type=str,
+        choices=ALLOWED_LOG_LEVELS,
         default=os.getenv("LOG_LEVEL", DEFAULT_LOG_LEVEL),
     )
 
